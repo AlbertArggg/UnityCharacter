@@ -6,16 +6,12 @@ namespace Scripts.StateMachine.Player
 {
     public class PlayerStateMachine : StateMachine
     {
+        [field:SerializeField] public InputReader InputReader { get; private set; }
+
         private void Start()
         {
             SwitchState(new PlayerTestState(this));
-            StartCoroutine(WaitAndSwitchStates());
-        }
-
-        IEnumerator WaitAndSwitchStates()
-        {
-            yield return new WaitForSeconds(4);
-            SwitchState(new PlayerTestState2(this));
+            
         }
     }
 }

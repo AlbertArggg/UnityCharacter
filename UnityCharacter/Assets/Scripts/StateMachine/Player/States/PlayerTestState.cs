@@ -10,6 +10,7 @@ namespace Scripts.StateMachine.Player
 
         public override void Enter()
         {
+            _stateMachine.InputReader.JumpEvent += OnJump;
             Debug.Log("Enter");
         }
         
@@ -24,7 +25,13 @@ namespace Scripts.StateMachine.Player
 
         public override void Exit()
         {
+            _stateMachine.InputReader.JumpEvent -= OnJump;
             Debug.Log("Exit");
+        }
+
+        private void OnJump()
+        {
+            _stateMachine.SwitchState(new PlayerTestState(_stateMachine));
         }
     }
 }
