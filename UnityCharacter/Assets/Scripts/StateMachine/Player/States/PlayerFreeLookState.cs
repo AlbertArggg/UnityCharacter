@@ -1,25 +1,31 @@
 using UnityEngine;
+using UnityEngine.Networking.PlayerConnection;
 
 namespace Scripts.StateMachine.Player
 {
     public class PlayerFreeLookState : PlayerBaseState
     {
-        private const float ANIMATOR_DAMP_TIME = 0.1f;
-
-        private readonly int FreeLookMovementSpeed = 
-            Animator.StringToHash(Constants.AnimationStrings.FREELOOK_MOVEMENT_SPEED);
-
         public PlayerFreeLookState(PlayerStateMachine stateMachine) : base(stateMachine){}
+        
+        private const float ANIMATOR_DAMP_TIME = 0.1f;
+        
+        private readonly int FreeLookBlendTree = 
+            Animator.StringToHash(Constants.AnimationStrings.FREE_LOOK_BLEND_TREE);
+        
+        private readonly int FreeLookMovementSpeed = 
+            Animator.StringToHash(Constants.AnimationStrings.FREE_LOOK_MOVEMENT_SPEED);
 
         public override void Enter()
         {
-            
+            _stateMachine._InputReader.TargetEvent += OnTarget;
+            _stateMachine._Animator.Play(FreeLookBlendTree);
         }
         
         public override void Tick(float deltaTime)
         {
             Vector3 movement = CalculateMovement();
-            _stateMachine._CharacterController.Move(movement * (_stateMachine._MovementSpeed * deltaTime));
+            
+            Move(movement * _stateMachine._MovementSpeed, deltaTime);
 
             if (_stateMachine._InputReader.MovementValue == Vector2.zero)
             {
@@ -52,7 +58,13 @@ namespace Scripts.StateMachine.Player
 
         public override void Exit()
         {
-            
+            _stateMachine._InputReader.TargetEvent -= OnTarget;
+        }
+
+        private void OnTarget()
+        {
+            if(!_stateMachine._Targeter.SelectTarget())return;
+            _stateMachine.SwitchState(new PlayerTargetingState(_stateMachine));
         }
     }
 }
